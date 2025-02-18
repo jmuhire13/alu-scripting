@@ -1,22 +1,38 @@
 #!/usr/bin/python3
-"""API"""
+"""
+1-top_ten.py
+"""
+
 import requests
 
-
 def top_ten(subreddit):
-    """Fetch and print the top 10 hot posts from a subreddit."""
-    reddit_url = f"https://www.reddit.com/r/{subreddit}/hot.json"
-    headers = {'User-agent': 'Mozilla/5.0'}
-    response = requests.get(reddit_url, headers=headers, params={'limit': 10})
+    """
+    Queries the Reddit API and prints the titles of the first 10 hot posts for a given subreddit.
 
-    # Check if the subreddit exists and the request was successful
-    if response.status_code == 200:
-        data = response.json().get('data', {})
-        posts = data.get('children', [])
-        if posts:
-            for post in posts:
-                print(post['data']['title'])
+    Args:
+        subreddit (str): The name of the subreddit.
+
+    Returns:
+        None
+    """
+    url = f"https://www.reddit.com/r/{subreddit}/hot.json"
+    headers = {"User-Agent": "Mozilla/5.0"}  # Custom User-Agent to avoid rate limiting
+
+    try:
+        response = requests.get(url, headers=headers, allow_redirects=False)
+        if response.status_code == 200:
+            data = response.json()
+            posts = data["data"]["children"]
+            for i, post in enumerate(posts[:10], 1):
+                print(post["data"]["title"])
         else:
-            print("OK")  # Subreddit exists but has no posts
+            print(None)
+    except requests.RequestException:
+        print(None)
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) < 2:
+        print("Please pass an argument for the subreddit to search.")
     else:
-        print("OK")  # Subreddit does not exist or other error
+        top_ten(sys.argv[1])
